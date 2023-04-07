@@ -3,7 +3,7 @@ How to run RISCV64 Debian Linux on an FPGA with Litex
 
 I managed to run a stable RISCV64 Debian Linux on FPGA using Litex. It has been tested with NaxRiscv and Rocket 64bit RISCV CPUs and on two FPGAs from Qmtech : qmtech_wukong (Artix xc7a100t) and qmtech_artix7_fbg484 (Artix xc7a200t plugged on vendor’s daughterboard).
 
-[](https://github.com/roryt12/RISCV64-Debian-Linux-on-FPGA-with-Litex/blob/master/2023-04-07%2016-01-39_VP8.gif)
+![](./2023-04-07%2016-01-39_gif.gif)
 
 Inspired from https://spinalhdl.github.io/NaxRiscv-Rtd/main/index.html (with many thanks to Charles Papon) and https://github.com/litex-hub/linux-on-litex-rocket (with many thanks to Gabriel L. Somlo).
 
