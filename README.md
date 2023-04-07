@@ -226,11 +226,11 @@ Rocket on wukong
         "opensbi-naxriscv.bin"		:       "0x40f00000"
 }
 ```
-
+I have uploaded all 4 , copy the one you want to boot.json
 
 11) Make an sd-card with three partitions: 1st (sda1) is VFAT that contains the above boot.json and all the other files used by it. 2nd (sda2) partition is a swap. 3rd (sda3) partition is ext4 and should contain a copy of the chroot riscv Debian filesystem mentioned above.
 Ensure that fstab is correct accordingly to the card ! 
 
-Put the card in the board, program the bitstream with Vivado, and you are ready to boot to Debian !
+Put the card in the board, connect your vga/hdmi (optional), your ethernet and your serial port with a program that supports speed 3M (like litex_term or putty), program the bitstream with Vivado, and you are ready to boot to Debian !
 
 
