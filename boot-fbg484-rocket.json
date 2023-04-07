@@ -1,0 +1,6 @@
+{
+	"Image"					:	"0x81000000",
+	"initrd.img-6.3.0-rc2"			:	"0x82000000",
+	"qmtech_fbg484-rocket.dtb"		:	"0x86000000",
+	"opensbi-rocket.bin"			:	"0x80f00000"
+}

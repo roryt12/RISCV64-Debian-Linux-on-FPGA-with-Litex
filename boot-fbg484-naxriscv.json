@@ -1,0 +1,6 @@
+{
+	"Image"				        :	"0x41000000",
+	"initrd.img-6.3.0-rc2"			:	"0x42000000",
+	"qmtech_fbg484-naxriscv.dtb"		: 	"0x46000000",
+	"opensbi-naxriscv.bin"			:	"0x40f00000"
+}
