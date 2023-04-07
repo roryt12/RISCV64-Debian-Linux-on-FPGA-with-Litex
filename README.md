@@ -1,11 +1,11 @@
 # RISCV64-Debian-on-FPGA-with-Litex
 How to run RISCV64 Debian Linux on an FPGA with Litex
 
-I managed to run a stable RISCV64 Debian Linux on FPGA using Litex.This has been tested with NaxRiscv and Rocket 64bit RISCV CPUs and on two FPGAs from Qmtech : qmtech_wukong (Artix xc7a100t) and qmtech_artix7_fbg484 (Artix xc7a200t) plugged qmtech's daughterboard.
+I managed to run a stable RISCV64 Debian Linux on FPGA using Litex. It has been tested with NaxRiscv and Rocket 64bit RISCV CPUs and on two FPGAs from Qmtech : qmtech_wukong (Artix xc7a100t) and qmtech_artix7_fbg484 (Artix xc7a200t plugged on vendor’s daughterboard).
 
-Inspired from https://spinalhdl.github.io/NaxRiscv-Rtd/main/index.html (with many thanks to Charles Papon) and https://github.com/tongchen126/Boot-Debian-On-Litex-Rocket (with many thanks to Gabriel L. Somlo).
+Inspired from https://spinalhdl.github.io/NaxRiscv-Rtd/main/index.html (with many thanks to Charles Papon) and https://github.com/litex-hub/linux-on-litex-rocket (with many thanks to Gabriel L. Somlo).
 
-As a development environment I used Debian 11 "bullseye" with backports. The steps I followed are (beware, YMMV) :
+As a development environment I used Debian 11 "bullseye" with backports. The steps I followed are (beware, YMMV):
 
 1) I Installed Litex https://github.com/enjoy-digital/litex as usual.
 ```
@@ -13,7 +13,7 @@ wget https://raw.githubusercontent.com/enjoy-digital/litex/master/litex_setup.py
 chmod +x litex_setup.py
 ./litex_setup.py --init --install --user --config=full
 ```
-2) You will need an ***already proved toolchain*** to build the SOC,firmware and kernel. Bullseye (even from backports) has up to version 10.2.1 and gave me a lot of headaches. Sid's is 12.2.0 and I think it is good enough. Nevertheless, I choosed to use the recommended toolchain. It takes some time to build, but worth the effort. The steps are from Litex/Rocket's Readme:
+2) You will need an ***already proved toolchain*** to build the SOC, firmware and kernel. Bullseye (even from backports) has Riscv cross-compile toolchain up to version 10.2.1 and gave me a lot of headaches. Sid's is 12.2.0 and I think it is good enough. Nevertheless, I used the recommended from Litex toolchain. It takes some time to build, but worth the effort. The steps are from Litex/Rocket's Readme:
 
 ```
 	git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
@@ -22,7 +22,7 @@ chmod +x litex_setup.py
 	make newlib linux -j($nproc)
 	popd
 ```	
-Put toolchain's installation path in your $PATH and confirm that eg riscv64-unknown-linux-gnu-gcc runs ok.
+Put toolchain's installation bin in your $PATH and confirm that e.g. riscv64-unknown-linux-gnu-gcc runs ok.
 
 3) In order to build the FPGA Bitstream: 
 
@@ -68,10 +68,10 @@ litex-boards/litex_boards/targets/qmtech_wukong.py --board-version 2 --build  \
 
 
 ***NOTES***
-a) I changed LiteEthPHYMII to LiteEthPHYGMII, LiteEthPHY to LiteEthGMii and switched ethernet clock to 12.5MHz in litex_boards/targets/qmtech_artix7_fbg484.py and litex_boards/targets/qmtech_wukong.py. This way I managed to have a working (most of the times) ethernet. At least I can ssh to the board, get time synchronization, and use vncserver/vncviewer over LAN. It is mostly 100MBps and after a while it needs reset. With the original MII setup I could not make it work at all.
-b) Both boards can support serial uart with speed 3MBps, hence the --uart-baudrate 3000000. Very usufull if you upload images over the serial port during boot (tested with litex_term and putty)
+a) I changed LiteEthPHYMII to LiteEthPHYGMII, LiteEthPHY to LiteEthGMii and switched ethernet clock to 12.5MHz in litex_boards/targets/qmtech_artix7_fbg484.py and litex_boards/targets/qmtech_wukong.py. This way I managed to have a working ethernet. At least I can ssh to the board, get time synchronization, and use vncserver/vncviewer over LAN. It is at most 100MBps and after a while it needs reset  (ifdown/ifup eth0). With the original MII setup I could not make it work at all.
+b) Both boards can support serial uart with speed 3MBps, hence the --uart-baudrate 3000000. Very useful if you upload images over the serial port during boot (tested with litex_term and putty)
 c) The video terminal works - somehow. For some strange reason I'm getting a lot of extra white space between lines. Not sure why yet.
-d) On NaxRiscv I used L2 = 0 after Charles' suggestion. On Rocket I found after testing, that a bit larger L2 cache and using bus bursting improves performance.
+d) On NaxRiscv I used L2 = 0 after Charles' suggestion. On Rocket I found (after testing), that a bit larger L2 cache and bus bursting improves performance.
 
 4) Creating the DTS / DTB :
 
@@ -84,11 +84,19 @@ litex_json2dts_linux --root-device mmcblk0p3 qmtech_wukong-rocket.json > qmtech_
 
 ```
 ***EDIT*** your dts file and change according to your needs. See mine for comparison. ***NOTES***:
-a) The reason for sbi/hvc0 in boot command line (after Charles' suggestion) is that liteuart gives me a lot of headaches, but the hvc driver works.
-b) I modified the start/end for the initrd
-c) For naxricv , in memory, I used reg = <0x41000000 0xF000000>; for simplicity and didn't used the  reserved-memory block. This is optional, I think it will work anyway with the defaults.
+a) The reason for sbi/hvc0 in boot command line (after Charles' suggestion) is that liteuart gives me a lot of headaches, but the hvc driver works better.
+b) I use “root=/dev/mmcblk0p3” because my root filesystem on the sd card is on the 3rd partition – see below
+c) I modified the start/end for the initrd to ensure that fits the one I used
+d) For NaxRiscv I used 
+```
+riscv,isa = "rv64imafdc"
+```
+e) I hased-out the interrupt line for liteuart, otherwise I have a lot of issues with interrupts.
 
-And now in order to get the final DTB, run (also depending your core/baord):
+f) I added a few components to the DTS files for Rocket (e.g. debug-controller etc), based on the DTS files from linux-on-litex-rocket
+
+I also suggest to compare the values for memories/interrupts against the produced .csv / .json file to ensure that your DTS is correct.
+In order to get the final DTB, run (also depending on your core/board):
 ```
 dtc -O dtb -o qmtech_artix7_fbg484-naxriscv.dtb qmtech_artix7_fbg484-naxriscv.dts
 dtc -O dtb -o qmtech_artix7_fbg484-rocket.dtb qmtech_artix7_fbg484-rocket.dts
@@ -99,33 +107,32 @@ dtc -O dtb -o qmtech_wukong-rocket.dtb qmtech_wukong-rocket.dts
 
 5) Compile your OpenSBI binary. 
 
-For Rocket I used a suggestion from Gabriel, and used the latest repository:
-
+Although I can compile usable binaries for both NaxRiscv and Rocket from the latest OpenSBI repository (1.2-94), still I have issues during kernel boot, that I can not pinpoint yet. 
+Instead I can produce usable binaries from an older version (0.8):
 ```
-git clone https://github.com/riscv-software-src/opensbi
-cd opensbi
-make -j $(nproc) CROSS_COMPILE=riscv64-unknown-linux-gnu- PLATFORM=generic FW_TEXT_START=0x80000000 FW_JUMP_ADDR=0x81000000  FW_JUMP_FDT_ADDR=0x86000000 FW_DYNAMIC=n FW_PAYLOAD=n
-cp build/platform/generic/firmware/fw_jump.bin ../opensbi-rocket.bin
+	git clone https://github.com/litex-hub/opensbi
+	cd opensbi
+	git checkout 0.8-linux-on-litex-vexriscv
+	cd platform/litex
+	cp -avf vexriscv naxriscv_64
+              cp -avf vexriscv rocket
+```		
+At this point you have to edit the files in the two directories to correspond to each core. For your convenience I have included mine. 
+In order to compile the binary:
+NaxRiscv:
+```		
 cd ..
-```
+	make PLATFORM=litex/naxriscv_64 CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc)
+cp build/platform/litex/naxriscv_64/firmware/fw_jump.bin  ../opensbi-naxriscv.bin
+```		
+Rocket:
+```		
+cd ..
+	make PLATFORM=litex/rocket CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc)
+cp build/platform/litex/rocket/firmware/fw_jump.bin  ../opensbi-rocket.bin
+```		
 
-Unfortunatelly I can not make the same with NaxRiscv, although I tried to change the parameters and/or create a new platform. Instead I used a previous version:
-```
-		git clone https://github.com/litex-hub/opensbi
-		cd opensbi
-		git checkout 0.8-linux-on-litex-vexriscv
-		cd platform/litex
-		cp -avf vexriscv naxriscv_64
-		cd naxriscv_64
-```		
-Edit the files in this directory, or just copy mine from opensbi-naxriscv.tgz
-```		
-		cd ../..
-		make PLATFORM=litex/naxriscv_64 CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc)
-    cp build/platform/litex/naxriscv_64/firmware/fw_jump.bin  ../opensbi-naxriscv.bin
-    cd ..
-```		
-6) Compile the Linux kernel :
+6) Compile the Linux kernel  (from Rocket’s README) :
 
 ```
 	git clone https://github.com/litex-hub/linux.git
@@ -135,32 +142,32 @@ Edit the files in this directory, or just copy mine from opensbi-naxriscv.tgz
 	
 ```	
 
-You should edit .config to add a few things, ie
+You should edit .config to add a few things, i.e.
 	
 ```
 	CONFIG_RISCV_SBI=y
 	CONFIG_RISCV_SBI_V01=y
 	CONFIG_SERIAL_EARLYCON_RISCV_SBI=y
-  CONFIG_HVC_DRIVER=y
+CONFIG_HVC_DRIVER=y
 	CONFIG_HVC_RISCV_SBI=y
 ```
-If unsure, use my .config (currently from 6.3.0-rc3).  Then run:
+If unsure, see my .config (currently from 6.3.0-rc5).  Then run:
 	
 ```	
 	make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc)
 
 ```
 
-Your kernel Image will be in 	arch/riscv/boot/Image
+Your kernel Image will be in arch/riscv/boot/Image
 
-7)  My target is to boot from an sdcard a full Debian environment. I created a chroot Debian environment with the instructions from https://wiki.debian.org/RISC-V, step 6, "Creating a riscv64 chroot", with debootstrap. 
+7)  My target is to boot from an sdcard a full Debian environment. I created a chroot Debian (SID) environment with the instructions from https://wiki.debian.org/RISC-V, step 6, "Creating a riscv64 chroot", with debootstrap and I used it in combination with binfmt-support. 
 ```
 	sudo apt-get install debootstrap qemu-user-static binfmt-support debian-ports-archive-keyring
 	sudo debootstrap --arch=riscv64 --keyring /usr/share/keyrings/debian-ports-archive-keyring.gpg \
       --include=debian-ports-archive-keyring unstable /tmp/riscv64-chroot http://deb.debian.org/debian-ports
 ```
 
-and after, run the steps in "Preparing the chroot for use in a virtual machine". The steps for u-boot are not really needed (for the moment at least). I modified a few other things in the chroot environment, eg  installed udev, locales / timezone and a few others. The usual things needed to be edited, eg hostname, hosts, network/interfaces, fstab etc. BEWARE with fstab, certainly you will have to adjust based on the UIDS  that your sdcard has.
+and after, run the steps in "Preparing the chroot for use in a virtual machine". The steps for u-boot are not really needed (for the moment at least). I modified a few other things in the chroot environment, e.g.  installed udev, locales / timezone and a few others. The usual things needed to be edited, eg hostname, hosts, network/interfaces, fstab etc. BEWARE with fstab, certainly you will have to adjust based on the UIDS  that your sdcard has.
 
 In systemd's journald.conf, I used:
 ```
@@ -177,28 +184,53 @@ and in /etc/login.defs :
 	LOGIN_TIMEOUT           180
 ```
 
-After all, this is a very low resources board and it is SLOW! I have uploaded the tarball with the filesystem for your convenience.
+After all, this is a very low resources board and it is SLOW! I have uploaded the tarball with the filesystem for your convenience. I have included a tarball with the root filesystem, feel free to use it or use it as a guideline. It has sshd, vncserver and icewm and configures eth0 with dhcp. Root’s password is litex and vncservers’ password is litex123.
 
+8)  I used a Debian style initrd. Initrd is a usefull to initialize devices during boot, fsck the filesystems etc. In order to make one, I used a trick: I moved my linux source tree inside /usr/src/ of my riscv Debian chroot filesystem, run chroot on the root of the filesystem, erased all scripts in the kernel tree (they have been compiled as x86 binaries) and recompiled the kernel natively with Debian's gcc, and then run make install - ie I installed the kernel inside my riscv filesystem. Debian's scripts made the initrd for me. Lazy, I know, if you know how to properly use mkinitrd feel free to use it instead. If unsure how to do any of these, use mine.
 
-8)  I used a Debian style initrd. Initrd is a usefull to initialize devices during boot, fsck the filesystems etc. 	In order to make one, I used a trick: 
-	I moved my linux source tree inside /usr/src/ of my riscv Debian chroot filesystem, run  chroot on the root of the filesystem, erased all scipts in the kernel tree (they have been compiled as x86 binaries) and recompiled the kernel natively with Debian's gcc, and	then run make install - ie I installed the kernel inside my riscv filesystem. Debian's scripts made the initrd for me. Lazy, I know, if you know how to properly use mkinitrd feel free to use it instead.
-	If unsure how to do any of these, use mine.
+10) Created the corresponding boot.json that contains the files needed for boot.
 
-
-10) Created a boot.json that contains :
-
+NaxRiscv on artix7_fbg484
 ```
-	{
-        "Image"                  :       "0x41000000",
-        "qmtech_wukong.dtb"      :       "0x46000000",
-        "initrd.img"   		 :       "0x42000000",
-        "opensbi.bin"            :       "0x40f00000"
-	}
-
+{
+        "Image"				:       "0x41000000",
+        "initrd.img-6.3.0-rc2"		:       "0x42000000",
+        "qmtech_artix7_fbg484.dtb"	:       "0x46000000",
+        "opensbi-naxriscv.bin"		:       "0x40f00000"
+}
+```
+NaxRiscv on wukong
+```
+{
+        "Image"				:       "0x41000000",
+        "initrd.img-6.3.0-rc2"		:       "0x42000000",
+        "qmtech_wukong-naxriscv.dtb"	:       "0x46000000",
+        "opensbi-naxriscv.bin"		:       "0x40f00000"
+}
+```
+Rocket on artix7_fbg484
+```
+{
+        "Image"				:       "0x41000000",
+        "initrd.img-6.3.0-rc2"		:       "0x42000000",
+        "qmtech_artix7_fbg484-rocket.dtb"	:       "0x46000000",
+        "opensbi-naxriscv.bin"		:       "0x40f00000"
+}
+```
+Rocket on wukong
+```
+{
+        "Image"				:       "0x41000000",
+        "initrd.img-6.3.0-rc2"		:       "0x42000000",
+        "qmtech_wukong-rocket.dts"	:       "0x46000000",
+        "opensbi-naxriscv.bin"		:       "0x40f00000"
+}
 ```
 
-11) Prepared a switable sdcard with three partitions: 1st is VFAT that contains the above boot.json and all the other files used by it. 2nd partition is a swap. 3rd partition is ext4 and should contain a copy of the chroot riscv Debian filesystem.
+
+11) Make an sd-card with three partitions: 1st (sda1) is VFAT that contains the above boot.json and all the other files used by it. 2nd (sda2) partition is a swap. 3rd (sda3) partition is ext4 and should contain a copy of the chroot riscv Debian filesystem mentioned above.
 Ensure that fstab is correct accordingly to the card ! 
 
-
 Put the card in the board, program the bitstream with Vivado, and you are ready to boot to Debian !
+
+
