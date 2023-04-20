@@ -187,7 +187,7 @@ and in /etc/login.defs :
 	LOGIN_TIMEOUT           180
 ```
 
-After all, this is a very low resources board and it is SLOW! I have uploaded the tarball with the filesystem for your convenience. 
+After all, this is a very low resources board and it is SLOW! I can not uploaded the tarball with the filesystem on github due to size. 
 
 8)  I used a Debian style initrd. Initrd is a usefull to initialize devices during boot, fsck the filesystems etc. In order to make one, I used a trick: I moved my linux source tree inside /usr/src/ of my riscv Debian chroot filesystem, run chroot on the root of the filesystem, erased all scripts in the kernel tree (they have been compiled as x86 binaries) and recompiled the kernel natively with Debian's gcc, and then run make install - ie I installed the kernel inside my riscv filesystem. Debian's scripts made the initrd for me. Lazy, I know, if you know how to properly use mkinitrd feel free to use it instead. If unsure how to do any of these, use mine.
 
