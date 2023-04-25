@@ -214,19 +214,19 @@ NaxRiscv on wukong
 Rocket on artix7_fbg484
 ```
 {
-        "Image"				:       "0x41000000",
-        "initrd.img-6.3.0-rc2"		:       "0x42000000",
-        "qmtech_artix7_fbg484-rocket.dtb"	:       "0x46000000",
-        "opensbi-naxriscv.bin"		:       "0x40f00000"
+        "Image"				:       "0x81000000",
+        "initrd.img-6.3.0-rc2"		:       "0x82000000",
+        "qmtech_artix7_fbg484-rocket.dtb":      "0x86000000",
+        "opensbi-naxriscv.bin"		:       "0x80f00000"
 }
 ```
 Rocket on wukong
 ```
 {
-        "Image"				:       "0x41000000",
-        "initrd.img-6.3.0-rc2"		:       "0x42000000",
-        "qmtech_wukong-rocket.dts"	:       "0x46000000",
-        "opensbi-naxriscv.bin"		:       "0x40f00000"
+        "Image"				:       "0x81000000",
+        "initrd.img-6.3.0-rc2"		:       "0x82000000",
+        "qmtech_wukong-rocket.dts"	:       "0x86000000",
+        "opensbi-naxriscv.bin"		:       "0x80f00000"
 }
 ```
 I have uploaded all 4 , copy the one you want to boot.json
