@@ -236,4 +236,4 @@ Ensure that fstab is correct accordingly to the card !
 
 Put the card in the board, connect your vga/hdmi (optional), your ethernet and your serial port with a program that supports speed 3M (like litex_term or putty), program the bitstream with Vivado, and you are ready to boot to Debian !
 
-
+![](./Clipboard02.jpg)
