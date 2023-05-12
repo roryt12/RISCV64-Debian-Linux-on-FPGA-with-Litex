@@ -101,8 +101,8 @@ f) I added a few components to the DTS files for Rocket (e.g. debug-controller e
 I also suggest to compare the values for memories/interrupts against the produced .csv / .json file to ensure that your DTS is correct.
 In order to get the final DTB, run (also depending on your core/board):
 ```
-dtc -O dtb -o qmtech_artix7_fbg484-naxriscv.dtb qmtech_artix7_fbg484-naxriscv.dts
-dtc -O dtb -o qmtech_artix7_fbg484-rocket.dtb qmtech_artix7_fbg484-rocket.dts
+dtc -O dtb -o qmtech_fbg484-naxriscv.dtb qmtech_artix7_fbg484-naxriscv.dts
+dtc -O dtb -o qmtech_fbg484-rocket.dtb qmtech_artix7_fbg484-rocket.dts
 dtc -O dtb -o qmtech_wukong-naxriscv.dtb qmtech_wukong-naxriscv.dts
 dtc -O dtb -o qmtech_wukong-rocket.dtb qmtech_wukong-rocket.dts
 
@@ -198,7 +198,7 @@ NaxRiscv on artix7_fbg484
 {
         "Image"				:       "0x41000000",
         "initrd.img-6.3.0-rc2"		:       "0x42000000",
-        "qmtech_artix7_fbg484.dtb"	:       "0x46000000",
+        "qmtech_fbg484.dtb"	:       "0x46000000",
         "opensbi-naxriscv.bin"		:       "0x40f00000"
 }
 ```
@@ -216,7 +216,7 @@ Rocket on artix7_fbg484
 {
         "Image"				:       "0x81000000",
         "initrd.img-6.3.0-rc2"		:       "0x82000000",
-        "qmtech_artix7_fbg484-rocket.dtb":      "0x86000000",
+        "qmtech_fbg484-rocket.dtb":      "0x86000000",
         "opensbi-naxriscv.bin"		:       "0x80f00000"
 }
 ```
