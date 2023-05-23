@@ -85,7 +85,7 @@ litex_json2dts_linux --root-device mmcblk0p3 qmtech_artix7_fbg484-rocket.json > 
 litex_json2dts_linux --root-device mmcblk0p3 qmtech_wukong-naxriscv.json > qmtech_wukong-naxriscv.dts
 litex_json2dts_linux --root-device mmcblk0p3 qmtech_wukong-rocket.json > qmtech_wukong-rocket.dts
 
-```
+``
 ***EDIT*** your dts file and change according to your needs. See mine for comparison. ***NOTES***:
 a) The reason for sbi/hvc0 in boot command line (after Charles' suggestion) is that liteuart gives me a lot of headaches, but the hvc driver works better.
 b) I use “root=/dev/mmcblk0p3” because my root filesystem on the sd card is on the 3rd partition – see below
@@ -118,20 +118,20 @@ Instead I can produce usable binaries from an older version (0.8):
 	git checkout 0.8-linux-on-litex-vexriscv
 	cd platform/litex
 	cp -avf vexriscv naxriscv_64
-              cp -avf vexriscv rocket
+        cp -avf vexriscv rocket
 ```		
 At this point you have to edit the files in the two directories to correspond to each core. For your convenience I have included mine. 
 In order to compile the binary:
 NaxRiscv:
 ```		
 cd ..
-	make PLATFORM=litex/naxriscv_64 CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc)
+make PLATFORM=litex/naxriscv_64 CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc)
 cp build/platform/litex/naxriscv_64/firmware/fw_jump.bin  ../opensbi-naxriscv.bin
 ```		
 Rocket:
 ```		
 cd ..
-	make PLATFORM=litex/rocket CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc)
+make PLATFORM=litex/rocket CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc)
 cp build/platform/litex/rocket/firmware/fw_jump.bin  ../opensbi-rocket.bin
 ```		
 
@@ -198,7 +198,7 @@ NaxRiscv on artix7_fbg484
 {
         "Image"				:       "0x41000000",
         "initrd.img-6.3.0-rc2"		:       "0x42000000",
-        "qmtech_fbg484.dtb"	:       "0x46000000",
+        "qmtech_fbg484.dtb"	        :       "0x46000000",
         "opensbi-naxriscv.bin"		:       "0x40f00000"
 }
 ```
@@ -216,7 +216,7 @@ Rocket on artix7_fbg484
 {
         "Image"				:       "0x81000000",
         "initrd.img-6.3.0-rc2"		:       "0x82000000",
-        "qmtech_fbg484-rocket.dtb":      "0x86000000",
+        "qmtech_fbg484-rocket.dtb"      :       "0x86000000",
         "opensbi-naxriscv.bin"		:       "0x80f00000"
 }
 ```
@@ -225,7 +225,7 @@ Rocket on wukong
 {
         "Image"				:       "0x81000000",
         "initrd.img-6.3.0-rc2"		:       "0x82000000",
-        "qmtech_wukong-rocket.dts"	:       "0x86000000",
+        "qmtech_wukong-rocket.dtb"	:       "0x86000000",
         "opensbi-naxriscv.bin"		:       "0x80f00000"
 }
 ```
