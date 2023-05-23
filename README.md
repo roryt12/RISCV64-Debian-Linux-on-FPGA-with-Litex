@@ -85,7 +85,7 @@ litex_json2dts_linux --root-device mmcblk0p3 qmtech_artix7_fbg484-rocket.json > 
 litex_json2dts_linux --root-device mmcblk0p3 qmtech_wukong-naxriscv.json > qmtech_wukong-naxriscv.dts
 litex_json2dts_linux --root-device mmcblk0p3 qmtech_wukong-rocket.json > qmtech_wukong-rocket.dts
 
-``
+```
 ***EDIT*** your dts file and change according to your needs. See mine for comparison. ***NOTES***:
 a) The reason for sbi/hvc0 in boot command line (after Charles' suggestion) is that liteuart gives me a lot of headaches, but the hvc driver works better.
 b) I use “root=/dev/mmcblk0p3” because my root filesystem on the sd card is on the 3rd partition – see below
