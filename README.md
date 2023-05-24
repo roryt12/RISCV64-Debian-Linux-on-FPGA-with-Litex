@@ -22,7 +22,7 @@ chmod +x litex_setup.py
 	git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
 	pushd riscv-gnu-toolchain
 	./configure --prefix=$HOME/RISCV --enable-multilib
-	make newlib linux -j($nproc)
+	make newlib linux -j$(nproc)
 	popd
 ```	
 Put toolchain's installation bin in your $PATH and confirm that e.g. riscv64-unknown-linux-gnu-gcc runs ok.
